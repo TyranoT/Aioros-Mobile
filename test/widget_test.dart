@@ -1,30 +1,65 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Testes de unidade dos enums de domínio e utilitários.
 
-import 'package:flutter/material.dart';
+import 'package:aioros_app/core/utils/duracao.dart';
+import 'package:aioros_app/core/utils/moeda.dart';
+import 'package:aioros_app/features/atendimentos/models/atendimento_status.dart';
+import 'package:aioros_app/features/mesas/models/mesa_status.dart';
+import 'package:aioros_app/features/pedidos/models/item_pedido_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:aioros_app/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('MesaStatus.fromApi', () {
+    test('resolve valores e variações', () {
+      expect(MesaStatus.fromApi('emAtendimento'), MesaStatus.emAtendimento);
+      expect(MesaStatus.fromApi('Em Atendimento'), MesaStatus.emAtendimento);
+      expect(MesaStatus.fromApi('disponível'), MesaStatus.disponivel);
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('lança em valor desconhecido', () {
+      expect(() => MesaStatus.fromApi('xpto'), throwsArgumentError);
+    });
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  group('AtendimentoStatus.fromApi', () {
+    test('resolve valores', () {
+      expect(AtendimentoStatus.fromApi('aberto'), AtendimentoStatus.aberto);
+      expect(
+        AtendimentoStatus.fromApi('ENCERRADO'),
+        AtendimentoStatus.encerrado,
+      );
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('ItemPedidoStatus', () {
+    test('apenas cancelado não conta no total', () {
+      expect(ItemPedidoStatus.cancelado.contaNoTotal, isFalse);
+      expect(ItemPedidoStatus.entregue.contaNoTotal, isTrue);
+      expect(ItemPedidoStatus.pendente.contaNoTotal, isTrue);
+    });
+  });
+
+  group('formatarCentavos', () {
+    test('formata centavos como moeda pt-BR', () {
+      expect(formatarCentavos(1290), contains('12,90'));
+      expect(formatarCentavos(0), contains('0,00'));
+    });
+  });
+
+  group('tempoDecorrido', () {
+    final base = DateTime(2026, 1, 1, 12);
+    test('descreve minutos e horas', () {
+      expect(tempoDecorrido(base, agora: base), 'agora');
+      expect(
+        tempoDecorrido(base, agora: base.add(const Duration(minutes: 5))),
+        'há 5 min',
+      );
+      expect(
+        tempoDecorrido(
+          base,
+          agora: base.add(const Duration(hours: 1, minutes: 20)),
+        ),
+        'há 1 h 20 min',
+      );
+    });
   });
 }
