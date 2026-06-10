@@ -1,3 +1,5 @@
+import 'package:aioros_app/features/mesas/models/mesa_status.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -22,6 +24,24 @@ class MesasPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: Builder(
+        builder: (context) {
+          return FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (BuildContext context) {
+                  return SheetCadastrarMesa(db: db, session: session);
+                },
+              );
+            },
+          );
+        },
+      ),
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,6 +80,88 @@ class MesasPage extends StatelessWidget {
                 return _GradeMesas(mesas: mesas);
               },
             ),
+    );
+  }
+}
+
+class SheetCadastrarMesa extends StatefulWidget {
+  const SheetCadastrarMesa({
+    super.key,
+    required this.db,
+    required this.session,
+  });
+
+  final AppDatabase db;
+  final SessionController session;
+
+  @override
+  State<SheetCadastrarMesa> createState() => _SheetCadastrarMesaState();
+}
+
+class _SheetCadastrarMesaState extends State<SheetCadastrarMesa> {
+  final TextEditingController _inputNomeMesa = TextEditingController.fromValue(
+    TextEditingValue(text: '1'),
+  );
+  final TextEditingController _inputQtdCadeiras =
+      TextEditingController.fromValue(TextEditingValue(text: '1'));
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 275,
+      child: Column(
+        children: [
+          ListTile(
+            title: Text('Cadastrar Mesa', style: AppTypography.title),
+            leading: Icon(Icons.table_restaurant, size: 24),
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _inputNomeMesa,
+              textInputAction: TextInputAction.next,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Número da Mesa',
+                prefixIcon: Icon(Icons.edit),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _inputQtdCadeiras,
+              textInputAction: TextInputAction.go,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Quantidade de Cadeiras',
+                prefixIcon: Icon(Icons.numbers),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                final mesasDao = MesasDao(widget.db);
+                mesasDao.inserir(
+                  MesasCompanion.insert(
+                    capacidade: int.parse(_inputQtdCadeiras.text),
+                    numero: int.parse(_inputNomeMesa.text),
+                    estabelecimentoId: widget.session.estabelecimentoId ?? '',
+                    status: drift.Value(MesaStatus.disponivel),
+                    id: '',
+                  ),
+                );
+
+                Navigator.pop(context);
+              },
+              child: Text("Salvar"),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
