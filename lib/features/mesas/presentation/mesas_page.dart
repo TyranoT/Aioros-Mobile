@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:aioros_app/features/mesas/models/mesa_status.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
@@ -24,7 +26,7 @@ class MesasPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: Builder(
+      floatingActionButton: session.isAdmin ? Builder(
         builder: (context) {
           return FloatingActionButton(
             child: Icon(Icons.add),
@@ -41,7 +43,7 @@ class MesasPage extends StatelessWidget {
             },
           );
         },
-      ),
+      ) : null,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +153,7 @@ class _SheetCadastrarMesaState extends State<SheetCadastrarMesa> {
                     numero: int.parse(_inputNomeMesa.text),
                     estabelecimentoId: widget.session.estabelecimentoId ?? '',
                     status: drift.Value(MesaStatus.disponivel),
-                    id: '',
+                    id: Random().nextInt(99999).toString(),
                   ),
                 );
 
