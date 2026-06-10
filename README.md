@@ -8,6 +8,13 @@ Seu objetivo é proporcionar uma experiência simples, rápida e eficiente para 
 
 ---
 
+# Equipe
+
+Matheus Soares Kirchesch
+Italo Monteiro Leite
+
+---
+
 # 📖 Visão Geral
 
 O sistema permite:
